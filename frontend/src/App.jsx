@@ -21,7 +21,7 @@ function App() {
   const fetchMahasiswa = async () => {
     try {
       const res = await axios.get(API_URL);
-      setMahasiswa(res.data || []);
+      setMahasiswa(res.data);
     } catch (err) {
       console.error("Gagal mengambil data:", err);
     }
@@ -68,7 +68,7 @@ function App() {
       fetchMahasiswa();
       handleReset();
     } catch (err) {
-      alert("Gagal memproses data: " + err.response?.data?.error);
+      alert("Gagal memproses data: " + err.response.data.error);
     }
   };
 

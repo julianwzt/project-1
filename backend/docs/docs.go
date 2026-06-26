@@ -31,7 +31,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                                "$ref": "#/definitions/models.Mahasiswa"
                             }
                         }
                     }
@@ -56,7 +56,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                            "$ref": "#/definitions/models.Mahasiswa"
                         }
                     }
                 ],
@@ -64,13 +64,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                            "$ref": "#/definitions/models.Mahasiswa"
                         }
                     }
                 }
             }
         },
-        "/api/mahasiswa/{id}": {
+        "/api/mahasiswa/:id": {
             "put": {
                 "description": "Mengupdate data mahasiswa berdasarkan ID",
                 "consumes": [
@@ -97,7 +97,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                            "$ref": "#/definitions/models.Mahasiswa"
                         }
                     }
                 ],
@@ -149,7 +149,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "backend-api_internal_models.Jurusan": {
+        "models.Jurusan": {
             "type": "object",
             "properties": {
                 "fakultas": {
@@ -166,14 +166,14 @@ const docTemplate = `{
                 }
             }
         },
-        "backend-api_internal_models.Mahasiswa": {
+        "models.Mahasiswa": {
             "type": "object",
             "properties": {
                 "alamat": {
                     "type": "string"
                 },
                 "detailjurusan": {
-                    "$ref": "#/definitions/backend-api_internal_models.Jurusan"
+                    "$ref": "#/definitions/models.Jurusan"
                 },
                 "id": {
                     "type": "integer"

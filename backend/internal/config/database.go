@@ -9,6 +9,7 @@ import (
 )
 
 var DB *sql.DB
+var err error
 
 func ConnectDB() {
 	host := "db"
@@ -20,7 +21,6 @@ func ConnectDB() {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
-	var err error
 	DB, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal("Gagal membuka koneksi database: ", err)

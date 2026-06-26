@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"backend-api/internal/config"
 	"backend-api/internal/models"
@@ -75,9 +76,14 @@ func CreateMahasiswa(c *gin.Context) {
 // @Param        id   path      int               true  "ID Mahasiswa"
 // @Param        mahasiswa  body    models.Mahasiswa  true  "Data Mahasiswa JSON"
 // @Success      200  {object}  map[string]string
-// @Router       /api/mahasiswa/{id} [put]
+// @Router       /api/mahasiswa/:id [put]
 func UpdateMahasiswa(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID harus berupa angka"})
+		return
+	}
 	var input models.Mahasiswa
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Format data tidak valid: " + err.Error()})
@@ -104,9 +110,14 @@ func UpdateMahasiswa(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int  true  "ID Mahasiswa"
 // @Success      200  {object}  map[string]string
-// @Router       /api/mahasiswa/{id} [delete]
+// @Router       /api/mahasiswa/:id [delete]
 func DeleteMahasiswa(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID harus berupa angka"})
+		return
+	}
 	query := `DELETE FROM mahasiswa WHERE id=$1`
 	result, err := config.DB.Exec(query, id)
 	if err != nil {

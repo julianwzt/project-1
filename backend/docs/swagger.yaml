@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  backend-api_internal_models.Jurusan:
+  models.Jurusan:
     properties:
       fakultas:
         type: string
@@ -11,12 +11,12 @@ definitions:
       nama_jurusan:
         type: string
     type: object
-  backend-api_internal_models.Mahasiswa:
+  models.Mahasiswa:
     properties:
       alamat:
         type: string
       detailjurusan:
-        $ref: '#/definitions/backend-api_internal_models.Jurusan'
+        $ref: '#/definitions/models.Jurusan'
       id:
         type: integer
       id_jurusan:
@@ -48,7 +48,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+              $ref: '#/definitions/models.Mahasiswa'
             type: array
       summary: Mengambil Data Mahasiswa
       tags:
@@ -63,18 +63,18 @@ paths:
         name: mahasiswa
         required: true
         schema:
-          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+          $ref: '#/definitions/models.Mahasiswa'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+            $ref: '#/definitions/models.Mahasiswa'
       summary: Menambahkan Data Mahasiswa
       tags:
       - mahasiswa
-  /api/mahasiswa/{id}:
+  /api/mahasiswa/:id:
     delete:
       consumes:
       - application/json
@@ -112,7 +112,7 @@ paths:
         name: mahasiswa
         required: true
         schema:
-          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+          $ref: '#/definitions/models.Mahasiswa'
       produces:
       - application/json
       responses:

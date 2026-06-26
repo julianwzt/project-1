@@ -1,0 +1,193 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Ini adalah dokumentasi REST API untuk mengelola data mahasiswa dan jurusan.",
+        "title": "API Manajemen Mahasiswa",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/mahasiswa": {
+            "get": {
+                "description": "Mengambil semua data mahasiswa beserta detail jurusannya",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Mengambil Data Mahasiswa",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Menambahkan data mahasiswa baru ke database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Menambahkan Data Mahasiswa",
+                "parameters": [
+                    {
+                        "description": "Data Mahasiswa JSON",
+                        "name": "mahasiswa",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/mahasiswa/{id}": {
+            "put": {
+                "description": "Mengupdate data mahasiswa berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Mengupdate Data Mahasiswa",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID Mahasiswa",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Mahasiswa JSON",
+                        "name": "mahasiswa",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Menghapus data mahasiswa berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Menghapus Data Mahasiswa",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID Mahasiswa",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "backend-api_internal_models.Jurusan": {
+            "type": "object",
+            "properties": {
+                "fakultas": {
+                    "type": "string"
+                },
+                "id_jurusan": {
+                    "type": "integer"
+                },
+                "jenjang": {
+                    "type": "string"
+                },
+                "nama_jurusan": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend-api_internal_models.Mahasiswa": {
+            "type": "object",
+            "properties": {
+                "alamat": {
+                    "type": "string"
+                },
+                "detailjurusan": {
+                    "$ref": "#/definitions/backend-api_internal_models.Jurusan"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_jurusan": {
+                    "type": "integer"
+                },
+                "nama": {
+                    "type": "string"
+                },
+                "nim": {
+                    "type": "string"
+                },
+                "tgl_lahir": {
+                    "type": "string"
+                },
+                "umur": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

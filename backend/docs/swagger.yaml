@@ -1,0 +1,128 @@
+basePath: /
+definitions:
+  backend-api_internal_models.Jurusan:
+    properties:
+      fakultas:
+        type: string
+      id_jurusan:
+        type: integer
+      jenjang:
+        type: string
+      nama_jurusan:
+        type: string
+    type: object
+  backend-api_internal_models.Mahasiswa:
+    properties:
+      alamat:
+        type: string
+      detailjurusan:
+        $ref: '#/definitions/backend-api_internal_models.Jurusan'
+      id:
+        type: integer
+      id_jurusan:
+        type: integer
+      nama:
+        type: string
+      nim:
+        type: string
+      tgl_lahir:
+        type: string
+      umur:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Ini adalah dokumentasi REST API untuk mengelola data mahasiswa dan
+    jurusan.
+  title: API Manajemen Mahasiswa
+  version: "1.0"
+paths:
+  /api/mahasiswa:
+    get:
+      description: Mengambil semua data mahasiswa beserta detail jurusannya
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+            type: array
+      summary: Mengambil Data Mahasiswa
+      tags:
+      - mahasiswa
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data mahasiswa baru ke database
+      parameters:
+      - description: Data Mahasiswa JSON
+        in: body
+        name: mahasiswa
+        required: true
+        schema:
+          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+      summary: Menambahkan Data Mahasiswa
+      tags:
+      - mahasiswa
+  /api/mahasiswa/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Menghapus data mahasiswa berdasarkan ID
+      parameters:
+      - description: ID Mahasiswa
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Menghapus Data Mahasiswa
+      tags:
+      - mahasiswa
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data mahasiswa berdasarkan ID
+      parameters:
+      - description: ID Mahasiswa
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data Mahasiswa JSON
+        in: body
+        name: mahasiswa
+        required: true
+        schema:
+          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mengupdate Data Mahasiswa
+      tags:
+      - mahasiswa
+swagger: "2.0"

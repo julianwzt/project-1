@@ -19,7 +19,7 @@ Pastikan Docker dan Docker Desktop sudah terinstall dan berjalan di komputer And
    ```
 4. Tunggu hingga proses build selesai.
 
-##Akses Aplikasi
+## Akses Aplikasi
 1. **Frontend**: http://localhost
 2. **Backend API**: http://localhost:8080
 3. **Dokumentasi API**: http://localhost:8080/swagger/index.html

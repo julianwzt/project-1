@@ -7,28 +7,48 @@ definitions:
       id_jurusan:
         type: integer
       jenjang:
+        enum:
+        - S1
+        - D3
+        - D4
+        - S2
+        - S3
         type: string
       nama_jurusan:
         type: string
+    required:
+    - fakultas
+    - id_jurusan
+    - jenjang
+    - nama_jurusan
     type: object
   models.Mahasiswa:
     properties:
       alamat:
         type: string
-      detailjurusan:
-        $ref: '#/definitions/models.Jurusan'
       id:
         type: integer
       id_jurusan:
         type: integer
+      jurusan:
+        $ref: '#/definitions/models.Jurusan'
       nama:
         type: string
       nim:
+        maxLength: 12
+        minLength: 12
         type: string
       tgl_lahir:
         type: string
       umur:
         type: integer
+    required:
+    - alamat
+    - id_jurusan
+    - nama
+    - nim
+    - tgl_lahir
+    - umur
     type: object
 host: localhost:8080
 info:
@@ -45,7 +65,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Daftar data mahasiswa
           schema:
             items:
               $ref: '#/definitions/models.Mahasiswa'
@@ -68,9 +88,15 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Data mahasiswa berhasil disimpan
           schema:
             $ref: '#/definitions/models.Mahasiswa'
+        "400":
+          description: Format data tidak valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Menambahkan Data Mahasiswa
       tags:
       - mahasiswa
@@ -89,7 +115,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Data mahasiswa berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Mahasiswa dengan ID tersebut tidak ditemukan
           schema:
             additionalProperties:
               type: string
@@ -117,12 +149,37 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Data mahasiswa berhasil diperbarui
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Mahasiswa dengan ID tersebut tidak ditemukan
           schema:
             additionalProperties:
               type: string
             type: object
       summary: Mengupdate Data Mahasiswa
+      tags:
+      - mahasiswa
+  /api/mahasiswa/export:
+    get:
+      description: Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx)
+        dengan format tanggal bersih (YYYY-MM-DD).
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File Laporan_Mahasiswa.xlsx berhasil diunduh
+          schema:
+            type: file
+        "500":
+          description: Gagal memproses data atau menulis file Excel
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Export Data Mahasiswa ke Excel
       tags:
       - mahasiswa
 swagger: "2.0"

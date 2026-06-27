@@ -27,7 +27,7 @@ const docTemplate = `{
                 "summary": "Mengambil Data Mahasiswa",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Daftar data mahasiswa",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -62,9 +62,18 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Data mahasiswa berhasil disimpan",
                         "schema": {
                             "$ref": "#/definitions/models.Mahasiswa"
+                        }
+                    },
+                    "400": {
+                        "description": "Format data tidak valid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -103,7 +112,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Data mahasiswa berhasil diperbarui",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mahasiswa dengan ID tersebut tidak ditemukan",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -136,7 +154,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Data mahasiswa berhasil dihapus",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mahasiswa dengan ID tersebut tidak ditemukan",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -146,11 +173,44 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/mahasiswa/export": {
+            "get": {
+                "description": "Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx) dengan format tanggal bersih (YYYY-MM-DD).",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Export Data Mahasiswa ke Excel",
+                "responses": {
+                    "200": {
+                        "description": "File Laporan_Mahasiswa.xlsx berhasil diunduh",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "Gagal memproses data atau menulis file Excel",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "models.Jurusan": {
             "type": "object",
+            "required": [
+                "fakultas",
+                "id_jurusan",
+                "jenjang",
+                "nama_jurusan"
+            ],
             "properties": {
                 "fakultas": {
                     "type": "string"
@@ -159,7 +219,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "jenjang": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "S1",
+                        "D3",
+                        "D4",
+                        "S2",
+                        "S3"
+                    ]
                 },
                 "nama_jurusan": {
                     "type": "string"
@@ -168,12 +235,17 @@ const docTemplate = `{
         },
         "models.Mahasiswa": {
             "type": "object",
+            "required": [
+                "alamat",
+                "id_jurusan",
+                "nama",
+                "nim",
+                "tgl_lahir",
+                "umur"
+            ],
             "properties": {
                 "alamat": {
                     "type": "string"
-                },
-                "detailjurusan": {
-                    "$ref": "#/definitions/models.Jurusan"
                 },
                 "id": {
                     "type": "integer"
@@ -181,11 +253,16 @@ const docTemplate = `{
                 "id_jurusan": {
                     "type": "integer"
                 },
+                "jurusan": {
+                    "$ref": "#/definitions/models.Jurusan"
+                },
                 "nama": {
                     "type": "string"
                 },
                 "nim": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 12,
+                    "minLength": 12
                 },
                 "tgl_lahir": {
                     "type": "string"

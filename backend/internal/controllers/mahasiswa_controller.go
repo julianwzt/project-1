@@ -14,7 +14,7 @@ import (
 // @Description  Mengambil semua data mahasiswa beserta detail jurusannya
 // @Tags         mahasiswa
 // @Produce      json
-// @Success      200  {array}   models.Mahasiswa
+// @Success      200  {array}   models.Mahasiswa "Daftar data mahasiswa"
 // @Router       /api/mahasiswa [get]
 func GetMahasiswa(c *gin.Context) {
 	query := `
@@ -51,7 +51,8 @@ func GetMahasiswa(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        mahasiswa  body    models.Mahasiswa  true  "Data Mahasiswa JSON"
-// @Success      201  {object}  models.Mahasiswa
+// @Success      201  {object}  models.Mahasiswa "Data mahasiswa berhasil disimpan"
+// @Failure      400  {object}  map[string]string "Format data tidak valid"
 // @Router       /api/mahasiswa [post]
 func CreateMahasiswa(c *gin.Context) {
 	var input models.Mahasiswa
@@ -75,7 +76,8 @@ func CreateMahasiswa(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int               true  "ID Mahasiswa"
 // @Param        mahasiswa  body    models.Mahasiswa  true  "Data Mahasiswa JSON"
-// @Success      200  {object}  map[string]string
+// @Success      200  {object}  map[string]string "Data mahasiswa berhasil diperbarui"
+// @Failure      404  {object}  map[string]string "Mahasiswa dengan ID tersebut tidak ditemukan"
 // @Router       /api/mahasiswa/:id [put]
 func UpdateMahasiswa(c *gin.Context) {
 	idParam := c.Param("id")
@@ -109,7 +111,8 @@ func UpdateMahasiswa(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id   path      int  true  "ID Mahasiswa"
-// @Success      200  {object}  map[string]string
+// @Success      200  {object}  map[string]string "Data mahasiswa berhasil dihapus"
+// @Failure      404  {object}  map[string]string "Mahasiswa dengan ID tersebut tidak ditemukan"
 // @Router       /api/mahasiswa/:id [delete]
 func DeleteMahasiswa(c *gin.Context) {
 	idParam := c.Param("id")
@@ -132,13 +135,14 @@ func DeleteMahasiswa(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Data mahasiswa berhasil dihapus"})
 }
 
-// @Summary      Mengekspor Data Mahasiswa ke Excel
-// @Description  Mengekspor semua data mahasiswa ke file Excel
+// ExportMahasiswaExcel godoc
+// @Summary      Export Data Mahasiswa ke Excel
+// @Description  Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx) dengan format tanggal bersih (YYYY-MM-DD).
 // @Tags         mahasiswa
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  map[string]string
-// @Router       /api/mahasiswa/export [export]
+// @Produce      application/octet-stream
+// @Success      200  {file}    binary "File Laporan_Mahasiswa.xlsx berhasil diunduh"
+// @Failure      500  {object}  map[string]interface{} "Gagal memproses data atau menulis file Excel"
+// @Router       /api/mahasiswa/export [get]
 func ExportMahasiswaExcel(c *gin.Context) {
 	query := `
 		SELECT m.nama, m.umur, m.nim, TO_CHAR(m.tgl_lahir, 'DD-MM-YYYY'), m.alamat, j.nama_jurusan

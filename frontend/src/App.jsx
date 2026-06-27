@@ -3,6 +3,12 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/mahasiswa";
 
+const jurusanData = {
+  1: { fakultas: "Fakultas Informatika", jenjang: "S1" },
+  2: { fakultas: "Fakultas Rekayasa Industri", jenjang: "S1" },
+  3: { fakultas: "Fakultas Ilmu Terapan", jenjang: "D3" },
+};
+
 function App() {
   const [mahasiswa, setMahasiswa] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +21,9 @@ function App() {
     nim: "",
     tgl_lahir: "",
     alamat: "",
-    id_jurusan: "1",
+    id_jurusan: "0",
+    fakultas: "",
+    jenjang: "",
   });
 
   const fetchMahasiswa = async () => {
@@ -32,7 +40,31 @@ function App() {
   }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    let newForm = { ...form, [e.target.name]: e.target.value };
+    const { name, value } = e.target;
+
+    if (name === "id_jurusan" && jurusanData[value]) {
+      newForm.fakultas = jurusanData[value].fakultas;
+      newForm.jenjang = jurusanData[value].jenjang;
+    }
+
+    if (name === "tgl_lahir" && value) {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        calculatedAge--;
+      }
+
+      newForm.umur = calculatedAge > 0 ? calculatedAge : 0;
+    }
+
+    setForm(newForm);
   };
 
   const handleReset = () => {
@@ -42,7 +74,9 @@ function App() {
       nim: "",
       tgl_lahir: "",
       alamat: "",
-      id_jurusan: "1",
+      id_jurusan: "0",
+      fakultas: "",
+      jenjang: "",
     });
     setIsEdit(false);
     setSelectedId(null);
@@ -51,10 +85,12 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      ...form,
+      nama: form.nama,
       umur: parseInt(form.umur),
-      id_jurusan: parseInt(form.id_jurusan),
+      nim: form.nim,
       tgl_lahir: form.tgl_lahir ? new Date(form.tgl_lahir).toISOString() : "",
+      alamat: form.alamat,
+      id_jurusan: parseInt(form.id_jurusan),
     };
 
     try {
@@ -98,19 +134,25 @@ function App() {
       tgl_lahir: dateOnly,
       alamat: m.alamat,
       id_jurusan: String(m.id_jurusan),
+      fakultas: m.jurusan ? m.jurusan.fakultas : "",
+      jenjang: m.jurusan ? m.jurusan.jenjang : "",
     });
   };
 
-  const filteredMahasiswa = mahasiswa.filter(
+  const filteredMahasiswa = (mahasiswa || []).filter(
     (m) =>
       m.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.nim.includes(searchQuery),
   );
 
+  const handleExportExcel = () => {
+    window.open(`${API_URL}/export`, "_blank");
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <div style={styles.headerForm}>Judul Form</div>
+        <div style={styles.headerForm}>Data Mahasiswa</div>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
             <label style={styles.label}>Nama :</label>
@@ -174,9 +216,29 @@ function App() {
               onChange={handleChange}
               style={styles.input}
             >
+              <option value="0"></option>
               <option value="1">Teknik Informatika</option>
               <option value="2">Sistem Informasi</option>
+              <option value="3">Rekayasa Perangkat Lunak</option>
             </select>
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Fakultas :</label>
+            <input
+              type="text"
+              value={form.fakultas || ""}
+              readOnly
+              style={styles.input}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Jenjang :</label>
+            <input
+              type="text"
+              value={form.jenjang || ""}
+              readOnly
+              style={styles.input}
+            />
           </div>
 
           <div style={styles.buttonGroup}>
@@ -213,7 +275,7 @@ function App() {
         <div style={styles.searchContainer}>
           <input
             type="text"
-            placeholder="🔍 Cari nama / NIM..."
+            placeholder="Cari nama / NIM..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={styles.searchInput}
@@ -221,7 +283,7 @@ function App() {
         </div>
         <div style={styles.listTitle}>List Data Mahasiswa</div>
         <div style={styles.listBox}>
-          {filteredMahasiswa.map((m) => (
+          {(filteredMahasiswa || []).map((m) => (
             <div
               key={m.id}
               onClick={() => handleItemClick(m)}
@@ -237,12 +299,29 @@ function App() {
               </small>
             </div>
           ))}
-          {filteredMahasiswa.length === 0 && (
+          {(filteredMahasiswa || []).length === 0 && (
             <p style={{ textValues: "center", color: "#999" }}>
               Data tidak ditemukan
             </p>
           )}
         </div>
+        <button
+          onClick={handleExportExcel}
+          style={{
+            marginLeft: "auto",
+            marginTop: "10px",
+            marginRight: "10px",
+            marginBottom: "15px",
+            padding: "10px",
+            backgroundColor: "#2e7d32",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Export Data ke Excel
+        </button>
       </div>
     </div>
   );

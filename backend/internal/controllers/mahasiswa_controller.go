@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"backend-api/internal/config"
+	"backend-api/internal/models"
 	"net/http"
 	"strconv"
 
-	"backend-api/internal/config"
-	"backend-api/internal/models"
-
 	"github.com/gin-gonic/gin"
+	"github.com/xuri/excelize/v2"
 )
 
 // @Summary      Mengambil Data Mahasiswa
@@ -130,4 +130,68 @@ func DeleteMahasiswa(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Data mahasiswa berhasil dihapus"})
+}
+
+// @Summary      Mengekspor Data Mahasiswa ke Excel
+// @Description  Mengekspor semua data mahasiswa ke file Excel
+// @Tags         mahasiswa
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Router       /api/mahasiswa/export [export]
+func ExportMahasiswaExcel(c *gin.Context) {
+	query := `
+		SELECT m.nama, m.umur, m.nim, TO_CHAR(m.tgl_lahir, 'DD-MM-YYYY'), m.alamat, j.nama_jurusan
+		FROM mahasiswa m
+		LEFT JOIN jurusan j ON m.id_jurusan = j.id_jurusan
+	`
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	f := excelize.NewFile()
+	sheetName := "Data Mahasiswa"
+	f.SetSheetName("Sheet1", sheetName)
+
+	headers := []string{"No", "NIM", "Nama Lengkap", "Umur", "Tanggal Lahir", "Alamat", "Jurusan"}
+	for colIdx, headerText := range headers {
+		cell, _ := excelize.CoordinatesToCellName(colIdx+1, 1)
+		f.SetCellValue(sheetName, cell, headerText)
+	}
+
+	rowNum := 2
+	no := 1
+	for rows.Next() {
+		var nama, nim, tglLahir, alamat string
+		var umur int
+		var namaJurusan *string
+
+		if err := rows.Scan(&nama, &umur, &nim, &tglLahir, &alamat, &namaJurusan); err == nil {
+			f.SetCellValue(sheetName, "A"+strconv.Itoa(rowNum), no)
+			f.SetCellStr(sheetName, "B"+strconv.Itoa(rowNum), nim)
+			f.SetCellValue(sheetName, "C"+strconv.Itoa(rowNum), nama)
+			f.SetCellValue(sheetName, "D"+strconv.Itoa(rowNum), umur)
+			f.SetCellStr(sheetName, "E"+strconv.Itoa(rowNum), tglLahir)
+			f.SetCellValue(sheetName, "F"+strconv.Itoa(rowNum), alamat)
+
+			if namaJurusan != nil {
+				f.SetCellValue(sheetName, "G"+strconv.Itoa(rowNum), *namaJurusan)
+			} else {
+				f.SetCellValue(sheetName, "G"+strconv.Itoa(rowNum), "-")
+			}
+
+			rowNum++
+			no++
+		}
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=Laporan_Mahasiswa.xlsx")
+	c.Header("Content-Type", "application/octet-stream")
+
+	if err := f.Write(c.Writer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat file Excel"})
+	}
 }

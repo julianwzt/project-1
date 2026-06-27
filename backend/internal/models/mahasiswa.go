@@ -1,10 +1,10 @@
 package models
 
 type Jurusan struct {
-	IDJurusan   int    `json:"id_jurusan"`
-	NamaJurusan string `json:"nama_jurusan"`
-	Fakultas    string `json:"fakultas"`
-	Jenjang     string `json:"jenjang"`
+	IDJurusan   int    `json:"id_jurusan" binding:"required"`
+	NamaJurusan string `json:"nama_jurusan" binding:"required"`
+	Fakultas    string `json:"fakultas" binding:"required"`
+	Jenjang     string `json:"jenjang" binding:"required" validate:"oneof=S1 D3 D4 S2 S3"`
 }
 
 type Mahasiswa struct {

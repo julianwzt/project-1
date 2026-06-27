@@ -11,4 +11,5 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/api/mahasiswa", controllers.CreateMahasiswa)
 	r.PUT("/api/mahasiswa/:id", controllers.UpdateMahasiswa)
 	r.DELETE("/api/mahasiswa/:id", controllers.DeleteMahasiswa)
+	r.GET("/api/mahasiswa/export", controllers.ExportMahasiswaExcel)
 }

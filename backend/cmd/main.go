@@ -16,7 +16,8 @@ import (
 // @version         1.0
 // @description     Ini adalah dokumentasi REST API untuk mengelola data mahasiswa dan jurusan.
 // @host            localhost:8080
-// @BasePath        /
+// @BasePath        /api
+// @Schemes         http
 func main() {
 	config.ConnectDB()
 	defer config.DB.Close()
@@ -36,8 +37,6 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	routes.SetupRoutes(r)
-
+	routes.SetupRoutes(r, config.DB)
 	r.Run(":8080")
 }
-

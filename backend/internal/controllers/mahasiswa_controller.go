@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"backend-api/internal/config"
 	"backend-api/internal/models"
+	"database/sql"
 	"net/http"
 	"strconv"
 
@@ -10,19 +10,27 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+type MahasiswaController struct {
+	db *sql.DB
+}
+
+func NewMahasiswaController(db *sql.DB) *MahasiswaController {
+	return &MahasiswaController{db: db}
+}
+
 // @Summary      Mengambil Data Mahasiswa
 // @Description  Mengambil semua data mahasiswa beserta detail jurusannya
 // @Tags         mahasiswa
 // @Produce      json
 // @Success      200  {array}   models.Mahasiswa "Daftar data mahasiswa"
-// @Router       /api/mahasiswa [get]
-func GetMahasiswa(c *gin.Context) {
+// @Router       /mahasiswa [get]
+func (a *MahasiswaController) GetMahasiswa(c *gin.Context) {
 	query := `
 		SELECT m.id, m.nama, m.umur, m.nim, m.tgl_lahir, m.alamat, m.id_jurusan, j.nama_jurusan, j.fakultas, j.jenjang
 		FROM mahasiswa m
 		LEFT JOIN jurusan j ON m.id_jurusan = j.id_jurusan
 	`
-	rows, err := config.DB.Query(query)
+	rows, err := a.db.Query(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -53,15 +61,15 @@ func GetMahasiswa(c *gin.Context) {
 // @Param        mahasiswa  body    models.Mahasiswa  true  "Data Mahasiswa JSON"
 // @Success      201  {object}  models.Mahasiswa "Data mahasiswa berhasil disimpan"
 // @Failure      400  {object}  map[string]string "Format data tidak valid"
-// @Router       /api/mahasiswa [post]
-func CreateMahasiswa(c *gin.Context) {
+// @Router       /mahasiswa [post]
+func (a *MahasiswaController) CreateMahasiswa(c *gin.Context) {
 	var input models.Mahasiswa
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Format data tidak valid: " + err.Error()})
 		return
 	}
 	query := `INSERT INTO mahasiswa (nama, umur, nim, tgl_lahir, alamat, id_jurusan) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
-	err := config.DB.QueryRow(query, input.Nama, input.Umur, input.NIM, input.TglLahir, input.Alamat, input.IDJurusan).Scan(&input.ID)
+	err := a.db.QueryRow(query, input.Nama, input.Umur, input.NIM, input.TglLahir, input.Alamat, input.IDJurusan).Scan(&input.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan data: " + err.Error()})
 		return
@@ -78,8 +86,8 @@ func CreateMahasiswa(c *gin.Context) {
 // @Param        mahasiswa  body    models.Mahasiswa  true  "Data Mahasiswa JSON"
 // @Success      200  {object}  map[string]string "Data mahasiswa berhasil diperbarui"
 // @Failure      404  {object}  map[string]string "Mahasiswa dengan ID tersebut tidak ditemukan"
-// @Router       /api/mahasiswa/:id [put]
-func UpdateMahasiswa(c *gin.Context) {
+// @Router       /mahasiswa/{id} [put]
+func (a *MahasiswaController) UpdateMahasiswa(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -92,7 +100,7 @@ func UpdateMahasiswa(c *gin.Context) {
 		return
 	}
 	query := `UPDATE mahasiswa SET nama=$1, umur=$2, nim=$3, tgl_lahir=$4, alamat=$5, id_jurusan=$6 WHERE id=$7`
-	result, err := config.DB.Exec(query, input.Nama, input.Umur, input.NIM, input.TglLahir, input.Alamat, input.IDJurusan, id)
+	result, err := a.db.Exec(query, input.Nama, input.Umur, input.NIM, input.TglLahir, input.Alamat, input.IDJurusan, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengupdate data: " + err.Error()})
 		return
@@ -113,8 +121,8 @@ func UpdateMahasiswa(c *gin.Context) {
 // @Param        id   path      int  true  "ID Mahasiswa"
 // @Success      200  {object}  map[string]string "Data mahasiswa berhasil dihapus"
 // @Failure      404  {object}  map[string]string "Mahasiswa dengan ID tersebut tidak ditemukan"
-// @Router       /api/mahasiswa/:id [delete]
-func DeleteMahasiswa(c *gin.Context) {
+// @Router       /mahasiswa/{id} [delete]
+func (a *MahasiswaController) DeleteMahasiswa(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -122,7 +130,7 @@ func DeleteMahasiswa(c *gin.Context) {
 		return
 	}
 	query := `DELETE FROM mahasiswa WHERE id=$1`
-	result, err := config.DB.Exec(query, id)
+	result, err := a.db.Exec(query, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menghapus data: " + err.Error()})
 		return
@@ -142,14 +150,14 @@ func DeleteMahasiswa(c *gin.Context) {
 // @Produce      application/octet-stream
 // @Success      200  {file}    binary "File Laporan_Mahasiswa.xlsx berhasil diunduh"
 // @Failure      500  {object}  map[string]interface{} "Gagal memproses data atau menulis file Excel"
-// @Router       /api/mahasiswa/export [get]
-func ExportMahasiswaExcel(c *gin.Context) {
+// @Router       /mahasiswa/export [get]
+func (a *MahasiswaController) ExportMahasiswaExcel(c *gin.Context) {
 	query := `
 		SELECT m.nama, m.umur, m.nim, TO_CHAR(m.tgl_lahir, 'DD-MM-YYYY'), m.alamat, j.nama_jurusan
 		FROM mahasiswa m
 		LEFT JOIN jurusan j ON m.id_jurusan = j.id_jurusan
 	`
-	rows, err := config.DB.Query(query)
+	rows, err := a.db.Query(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

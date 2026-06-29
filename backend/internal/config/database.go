@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -11,14 +12,21 @@ import (
 var DB *sql.DB
 var err error
 
-func ConnectDB() {
-	host := "db"
-	port := 5432
-	user := "postgres"
-	password := "20060721"
-	dbname := "postgres"
+func getenv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
+}
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+func ConnectDB() {
+	host := getenv("DB_HOST", "db")
+	port := getenv("DB_PORT", "5432")
+	user := getenv("DB_USER", "postgres")
+	password := getenv("DB_PASSWORD", "rahasia123")
+	dbname := getenv("DB_NAME", "postgres")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
 	DB, err = sql.Open("postgres", psqlInfo)

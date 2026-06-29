@@ -1,28 +1,17 @@
-basePath: /
+basePath: /api
 definitions:
-  models.Jurusan:
+  backend-api_internal_models.Jurusan:
     properties:
       fakultas:
         type: string
       id_jurusan:
         type: integer
       jenjang:
-        enum:
-        - S1
-        - D3
-        - D4
-        - S2
-        - S3
         type: string
       nama_jurusan:
         type: string
-    required:
-    - fakultas
-    - id_jurusan
-    - jenjang
-    - nama_jurusan
     type: object
-  models.Mahasiswa:
+  backend-api_internal_models.Mahasiswa:
     properties:
       alamat:
         type: string
@@ -31,24 +20,15 @@ definitions:
       id_jurusan:
         type: integer
       jurusan:
-        $ref: '#/definitions/models.Jurusan'
+        $ref: '#/definitions/backend-api_internal_models.Jurusan'
       nama:
         type: string
       nim:
-        maxLength: 12
-        minLength: 12
         type: string
       tgl_lahir:
         type: string
       umur:
         type: integer
-    required:
-    - alamat
-    - id_jurusan
-    - nama
-    - nim
-    - tgl_lahir
-    - umur
     type: object
 host: localhost:8080
 info:
@@ -58,7 +38,30 @@ info:
   title: API Manajemen Mahasiswa
   version: "1.0"
 paths:
-  /api/mahasiswa:
+  /jurusan:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil seluruh data referensi jurusan untuk dropdown
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data jurusan berhasil diambil
+          schema:
+            items:
+              $ref: '#/definitions/backend-api_internal_models.Jurusan'
+            type: array
+        "500":
+          description: Gagal mengambil data jurusan
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: GetJurusan
+      tags:
+      - Jurusan
+  /mahasiswa:
     get:
       description: Mengambil semua data mahasiswa beserta detail jurusannya
       produces:
@@ -68,7 +71,7 @@ paths:
           description: Daftar data mahasiswa
           schema:
             items:
-              $ref: '#/definitions/models.Mahasiswa'
+              $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
             type: array
       summary: Mengambil Data Mahasiswa
       tags:
@@ -83,14 +86,14 @@ paths:
         name: mahasiswa
         required: true
         schema:
-          $ref: '#/definitions/models.Mahasiswa'
+          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
       produces:
       - application/json
       responses:
         "201":
           description: Data mahasiswa berhasil disimpan
           schema:
-            $ref: '#/definitions/models.Mahasiswa'
+            $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
         "400":
           description: Format data tidak valid
           schema:
@@ -100,7 +103,7 @@ paths:
       summary: Menambahkan Data Mahasiswa
       tags:
       - mahasiswa
-  /api/mahasiswa/:id:
+  /mahasiswa/{id}:
     delete:
       consumes:
       - application/json
@@ -144,7 +147,7 @@ paths:
         name: mahasiswa
         required: true
         schema:
-          $ref: '#/definitions/models.Mahasiswa'
+          $ref: '#/definitions/backend-api_internal_models.Mahasiswa'
       produces:
       - application/json
       responses:
@@ -163,7 +166,7 @@ paths:
       summary: Mengupdate Data Mahasiswa
       tags:
       - mahasiswa
-  /api/mahasiswa/export:
+  /mahasiswa/export:
     get:
       description: Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx)
         dengan format tanggal bersih (YYYY-MM-DD).
@@ -182,4 +185,6 @@ paths:
       summary: Export Data Mahasiswa ke Excel
       tags:
       - mahasiswa
+schemes:
+- http
 swagger: "2.0"

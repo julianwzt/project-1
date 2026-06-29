@@ -15,7 +15,42 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/mahasiswa": {
+        "/jurusan": {
+            "get": {
+                "description": "Mengambil seluruh data referensi jurusan untuk dropdown",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Jurusan"
+                ],
+                "summary": "GetJurusan",
+                "responses": {
+                    "200": {
+                        "description": "Data jurusan berhasil diambil",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend-api_internal_models.Jurusan"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Gagal mengambil data jurusan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mahasiswa": {
             "get": {
                 "description": "Mengambil semua data mahasiswa beserta detail jurusannya",
                 "produces": [
@@ -31,7 +66,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Mahasiswa"
+                                "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
                             }
                         }
                     }
@@ -56,7 +91,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Mahasiswa"
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
                         }
                     }
                 ],
@@ -64,7 +99,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Data mahasiswa berhasil disimpan",
                         "schema": {
-                            "$ref": "#/definitions/models.Mahasiswa"
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
                         }
                     },
                     "400": {
@@ -79,7 +114,34 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/mahasiswa/:id": {
+        "/mahasiswa/export": {
+            "get": {
+                "description": "Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx) dengan format tanggal bersih (YYYY-MM-DD).",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "mahasiswa"
+                ],
+                "summary": "Export Data Mahasiswa ke Excel",
+                "responses": {
+                    "200": {
+                        "description": "File Laporan_Mahasiswa.xlsx berhasil diunduh",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "Gagal memproses data atau menulis file Excel",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/mahasiswa/{id}": {
             "put": {
                 "description": "Mengupdate data mahasiswa berdasarkan ID",
                 "consumes": [
@@ -106,7 +168,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Mahasiswa"
+                            "$ref": "#/definitions/backend-api_internal_models.Mahasiswa"
                         }
                     }
                 ],
@@ -173,44 +235,11 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/mahasiswa/export": {
-            "get": {
-                "description": "Mengunduh seluruh daftar data mahasiswa ke dalam file Excel (.xlsx) dengan format tanggal bersih (YYYY-MM-DD).",
-                "produces": [
-                    "application/octet-stream"
-                ],
-                "tags": [
-                    "mahasiswa"
-                ],
-                "summary": "Export Data Mahasiswa ke Excel",
-                "responses": {
-                    "200": {
-                        "description": "File Laporan_Mahasiswa.xlsx berhasil diunduh",
-                        "schema": {
-                            "type": "file"
-                        }
-                    },
-                    "500": {
-                        "description": "Gagal memproses data atau menulis file Excel",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "models.Jurusan": {
+        "backend-api_internal_models.Jurusan": {
             "type": "object",
-            "required": [
-                "fakultas",
-                "id_jurusan",
-                "jenjang",
-                "nama_jurusan"
-            ],
             "properties": {
                 "fakultas": {
                     "type": "string"
@@ -219,30 +248,15 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "jenjang": {
-                    "type": "string",
-                    "enum": [
-                        "S1",
-                        "D3",
-                        "D4",
-                        "S2",
-                        "S3"
-                    ]
+                    "type": "string"
                 },
                 "nama_jurusan": {
                     "type": "string"
                 }
             }
         },
-        "models.Mahasiswa": {
+        "backend-api_internal_models.Mahasiswa": {
             "type": "object",
-            "required": [
-                "alamat",
-                "id_jurusan",
-                "nama",
-                "nim",
-                "tgl_lahir",
-                "umur"
-            ],
             "properties": {
                 "alamat": {
                     "type": "string"
@@ -254,15 +268,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "jurusan": {
-                    "$ref": "#/definitions/models.Jurusan"
+                    "$ref": "#/definitions/backend-api_internal_models.Jurusan"
                 },
                 "nama": {
                     "type": "string"
                 },
                 "nim": {
-                    "type": "string",
-                    "maxLength": 12,
-                    "minLength": 12
+                    "type": "string"
                 },
                 "tgl_lahir": {
                     "type": "string"
@@ -279,8 +291,8 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/",
-	Schemes:          []string{},
+	BasePath:         "/api",
+	Schemes:          []string{"http"},
 	Title:            "API Manajemen Mahasiswa",
 	Description:      "Ini adalah dokumentasi REST API untuk mengelola data mahasiswa dan jurusan.",
 	InfoInstanceName: "swagger",

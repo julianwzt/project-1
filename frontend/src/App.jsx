@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/mahasiswa";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = `${API_BASE_URL}/api/mahasiswa`;
+const API_JURUSAN_URL = `${API_BASE_URL}/api/jurusan`;
 
 const jurusanData = {
   1: { fakultas: "Fakultas Informatika", jenjang: "S1" },
@@ -14,17 +16,30 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
-  const [form, setForm] = useState({
+  const [jurusanList, setJurusanList] = useState([]);
+  const [formData, setFormData] = useState({
     nama: "",
     umur: "",
     nim: "",
     tgl_lahir: "",
     alamat: "",
-    id_jurusan: "0",
+    id_jurusan: "",
     fakultas: "",
     jenjang: "",
   });
+
+  const fakultasOptions = Array.from(
+    new Set(jurusanList.map((jur) => jur.fakultas)),
+  ).filter(Boolean);
+
+  const jenjangOptions = Array.from(
+    new Set(jurusanList.map((jur) => jur.jenjang)),
+  ).filter(Boolean);
+
+  useEffect(() => {
+    fetchMahasiswa();
+    fetchJurusan();
+  }, []);
 
   const fetchMahasiswa = async () => {
     try {
@@ -35,17 +50,30 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchMahasiswa();
-  }, []);
+  const fetchJurusan = async () => {
+    try {
+      const response = await axios.get(API_JURUSAN_URL);
+      setJurusanList(response.data);
+    } catch (error) {
+      console.error("Error fetching jurusan:", error);
+    }
+  };
 
   const handleChange = (e) => {
-    let newForm = { ...form, [e.target.name]: e.target.value };
     const { name, value } = e.target;
+    const newForm = { ...formData, [name]: value };
 
-    if (name === "id_jurusan" && jurusanData[value]) {
-      newForm.fakultas = jurusanData[value].fakultas;
-      newForm.jenjang = jurusanData[value].jenjang;
+    if (name === "id_jurusan") {
+      const selectedJurusan = jurusanList.find(
+        (jur) => String(jur.id_jurusan) === value,
+      );
+      if (selectedJurusan) {
+        newForm.fakultas = selectedJurusan.fakultas;
+        newForm.jenjang = selectedJurusan.jenjang;
+      } else {
+        newForm.fakultas = "";
+        newForm.jenjang = "";
+      }
     }
 
     if (name === "tgl_lahir" && value) {
@@ -64,17 +92,17 @@ function App() {
       newForm.umur = calculatedAge > 0 ? calculatedAge : 0;
     }
 
-    setForm(newForm);
+    setFormData(newForm);
   };
 
   const handleReset = () => {
-    setForm({
+    setFormData({
       nama: "",
       umur: "",
       nim: "",
       tgl_lahir: "",
       alamat: "",
-      id_jurusan: "0",
+      id_jurusan: "",
       fakultas: "",
       jenjang: "",
     });
@@ -85,12 +113,14 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      nama: form.nama,
-      umur: parseInt(form.umur),
-      nim: form.nim,
-      tgl_lahir: form.tgl_lahir ? new Date(form.tgl_lahir).toISOString() : "",
-      alamat: form.alamat,
-      id_jurusan: parseInt(form.id_jurusan),
+      nama: formData.nama,
+      umur: parseInt(formData.umur),
+      nim: formData.nim,
+      tgl_lahir: formData.tgl_lahir
+        ? new Date(formData.tgl_lahir).toISOString()
+        : "",
+      alamat: formData.alamat,
+      id_jurusan: parseInt(formData.id_jurusan),
     };
 
     try {
@@ -127,7 +157,7 @@ function App() {
     setIsEdit(true);
     setSelectedId(m.id);
     const dateOnly = m.tgl_lahir ? m.tgl_lahir.split("T")[0] : "";
-    setForm({
+    setFormData({
       nama: m.nama,
       umur: m.umur,
       nim: m.nim,
@@ -159,7 +189,7 @@ function App() {
             <input
               type="text"
               name="nama"
-              value={form.nama}
+              value={formData.nama}
               onChange={handleChange}
               required
               style={styles.input}
@@ -170,7 +200,7 @@ function App() {
             <input
               type="number"
               name="umur"
-              value={form.umur}
+              value={formData.umur}
               onChange={handleChange}
               required
               style={styles.input}
@@ -181,7 +211,7 @@ function App() {
             <input
               type="text"
               name="nim"
-              value={form.nim}
+              value={formData.nim}
               onChange={handleChange}
               required
               style={styles.input}
@@ -192,7 +222,7 @@ function App() {
             <input
               type="date"
               name="tgl_lahir"
-              value={form.tgl_lahir}
+              value={formData.tgl_lahir}
               onChange={handleChange}
               required
               style={styles.input}
@@ -202,7 +232,7 @@ function App() {
             <label style={styles.label}>Alamat :</label>
             <textarea
               name="alamat"
-              value={form.alamat}
+              value={formData.alamat}
               onChange={handleChange}
               rows="3"
               style={styles.textarea}
@@ -212,33 +242,52 @@ function App() {
             <label style={styles.label}>Jurusan :</label>
             <select
               name="id_jurusan"
-              value={form.id_jurusan}
+              value={formData.id_jurusan}
               onChange={handleChange}
+              required
               style={styles.input}
             >
-              <option value="0"></option>
-              <option value="1">Teknik Informatika</option>
-              <option value="2">Sistem Informasi</option>
-              <option value="3">Rekayasa Perangkat Lunak</option>
+              <option value="">Pilih Jurusan</option>
+              {jurusanList.map((jur) => (
+                <option key={jur.id_jurusan} value={jur.id_jurusan}>
+                  {jur.nama_jurusan}
+                </option>
+              ))}
             </select>
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Fakultas :</label>
-            <input
-              type="text"
-              value={form.fakultas || ""}
-              readOnly
+            <select
+              name="fakultas"
+              value={formData.fakultas}
+              onChange={handleChange}
+              required
               style={styles.input}
-            />
+            >
+              <option value="">Pilih Fakultas</option>
+              {fakultasOptions.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Jenjang :</label>
-            <input
-              type="text"
-              value={form.jenjang || ""}
-              readOnly
+            <select
+              name="jenjang"
+              value={formData.jenjang}
+              onChange={handleChange}
+              required
               style={styles.input}
-            />
+            >
+              <option value="">Pilih Jenjang</option>
+              {jenjangOptions.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={styles.buttonGroup}>

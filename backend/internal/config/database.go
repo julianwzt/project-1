@@ -1,42 +1,42 @@
 package config
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-	"os"
+    "database/sql"
+    "fmt"
+    "log"
+    "os"
 
-	_ "github.com/lib/pq"
+    _ "github.com/lib/pq"
 )
 
 var DB *sql.DB
-var err error
-
-func getenv(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
-}
 
 func ConnectDB() {
-	host := getenv("DB_HOST", "db")
-	port := getenv("DB_PORT", "5432")
-	user := getenv("DB_USER", "postgres")
-	password := getenv("DB_PASSWORD", "rahasia123")
-	dbname := getenv("DB_NAME", "postgres")
+    host := getenv("DB_HOST", "postgres-service")
+    user := getenv("DB_USER", "postgres")
+    pass := getenv("DB_PASSWORD", "password")
+    name := getenv("DB_NAME", "mahasiswa_db")
+    port := getenv("DB_PORT", "5432")
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+    dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", 
+        host, user, pass, name, port)
+    
+    var err error
+    DB, err = sql.Open("postgres", dsn)
+    if err != nil {
+        log.Fatal("Error opening database: ", err)
+    }
 
-	DB, err = sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Fatal("Gagal membuka koneksi database: ", err)
-	}
+    if err = DB.Ping(); err != nil {
+        log.Fatal("Error connecting to the database: ", err)
+    }
+    
+    fmt.Println("Berhasil terhubung ke database!")
+}
 
-	err = DB.Ping()
-	if err != nil {
-		log.Fatal("Gagal koneksi ke database: ", err)
-	}
-	fmt.Println("Berhasil terhubung ke database PostgreSQL!")
+func getenv(key, fallback string) string {
+    if value := os.Getenv(key); value != "" {
+        return value
+    }
+    return fallback
 }

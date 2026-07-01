@@ -5,12 +5,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 const API_URL = `${API_BASE_URL}/api/mahasiswa`;
 const API_JURUSAN_URL = `${API_BASE_URL}/api/jurusan`;
 
-const jurusanData = {
-  1: { fakultas: "Fakultas Informatika", jenjang: "S1" },
-  2: { fakultas: "Fakultas Rekayasa Industri", jenjang: "S1" },
-  3: { fakultas: "Fakultas Ilmu Terapan", jenjang: "D3" },
-};
-
 function App() {
   const [mahasiswa, setMahasiswa] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");

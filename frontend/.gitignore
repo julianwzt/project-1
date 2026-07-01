@@ -13,3 +13,10 @@ pgdata/
 # OS Files
 .DS_Store
 Thumbs.db
+
+#clear cache
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache

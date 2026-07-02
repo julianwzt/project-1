@@ -1,28 +1,72 @@
-# Aplikasi Manajemen Data Mahasiswa
+# Aplikasi Manajemen Data Mahasiswa (Go + React)
 
-Aplikasi Full-Stack untuk mengelola data mahasiswa, dilengkapi dengan fitur ekspor Excel. Dibangun menggunakan React, Golang (Gin), dan PostgreSQL, serta sepenuhnya di-dockerize.
+Aplikasi Full-Stack dengan arsitektur Microservices, dirancang untuk berjalan di lingkungan Kubernetes.
 
-## Teknologi yang Digunakan
+## 🚀 Teknologi
 
-1. **Frontend:** React.js, Vite
-2. **Backend:** Golang, Gin Framework
-3. **Database:** PostgreSQL
-4. **Tools:** Docker, Docker Compose, Swagger UI
+- **Frontend:** React.js (Vite) + Nginx
+- **Backend:** Golang (Gin Framework)
+- **Database:** PostgreSQL
+- **Infrastruktur:** Kubernetes (Minikube)
 
-## Cara Menjalankan Aplikasi
+## 🛠️ Cara Menjalankan
 
-Pastikan Docker dan Docker Desktop sudah terinstall dan berjalan di komputer Anda.
+### 1. Persiapan Cluster
 
-1. Clone repositori ini atau ekstrak file ZIP.
-2. Buka terminal di direktori utama proyek.
-3. Jalankan perintah berikut:
-   ```bash
-   docker-compose up --build -d
-   ```
-4. Tunggu hingga proses build selesai.
+Jalankan di PowerShell:
 
-## Akses Aplikasi
+```bash
+minikube start
+minikube -p minikube docker-env | Invoke-Expression
+```
 
-1. **Frontend**: http://localhost:8080
-2. **Backend API**: http://localhost:8080/api
-3. **Dokumentasi API**: http://localhost:8080/swagger/index.html
+### 2. Build Image (Wajib di terminal yang sama)
+
+```bash
+# Backend
+cd backend
+docker build -t backend-api:1.0 .
+cd ..
+
+# Frontend
+cd frontend
+docker build -t frontend-web:1.0 .
+cd ..
+
+```
+
+### 3. Deploy
+
+```bash
+kubectl apply -f k8s/database.yaml
+kubectl apply -f k8s/backend.yaml
+kubectl apply -f k8s/frontend.yaml
+
+```
+
+_(Cek dengan `kubectl get pods -w` hingga semua berstatus `Running`)_
+
+### 4. Akses Aplikasi
+
+Buka terminal baru, jalankan port-forward untuk web:
+
+```bash
+kubectl port-forward svc/frontend-service 3000:8080
+
+```
+
+Buka browser: **`http://localhost:3000`**
+
+_(Opsional) Untuk dokumentasi API Swagger, buka terminal baru:_
+
+```bash
+kubectl port-forward svc/backend 8080:8080
+
+```
+
+Buka browser: **`http://localhost:8080/swagger/index.html`**
+
+## 💡 Arsitektur & Catatan
+
+- **Auto-Init DB:** Pembuatan tabel ditangani otomatis via `ConfigMap` di `database.yaml`.
+- **API Proxying:** Nginx pada container Frontend dikonfigurasi untuk meneruskan rute `/api` langsung ke _service_ Backend secara internal.

@@ -20,7 +20,7 @@ minikube start
 minikube -p minikube docker-env | Invoke-Expression
 ```
 
-### 2. Build Image (Wajib di terminal yang sama)
+### 2. Build Image
 
 ```bash
 # Backend

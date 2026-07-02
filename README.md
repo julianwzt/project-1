@@ -2,14 +2,14 @@
 
 Aplikasi Full-Stack dengan arsitektur Microservices, dirancang untuk berjalan di lingkungan Kubernetes.
 
-## 🚀 Teknologi
+## Teknologi
 
 - **Frontend:** React.js (Vite) + Nginx
 - **Backend:** Golang (Gin Framework)
 - **Database:** PostgreSQL
 - **Infrastruktur:** Kubernetes (Minikube)
 
-## 🛠️ Cara Menjalankan
+## Cara Menjalankan
 
 ### 1. Persiapan Cluster
 

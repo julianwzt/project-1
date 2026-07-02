@@ -1,4 +1,4 @@
-# Aplikasi Manajemen Data Mahasiswa (Go + React)
+# Aplikasi Manajemen Data Mahasiswa
 
 Aplikasi Full-Stack dengan arsitektur Microservices, dirancang untuk berjalan di lingkungan Kubernetes.
 

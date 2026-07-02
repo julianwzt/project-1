@@ -65,8 +65,3 @@ kubectl port-forward svc/backend 8080:8080
 ```
 
 Buka browser: **`http://localhost:8080/swagger/index.html`**
-
-## 💡 Arsitektur & Catatan
-
-- **Auto-Init DB:** Pembuatan tabel ditangani otomatis via `ConfigMap` di `database.yaml`.
-- **API Proxying:** Nginx pada container Frontend dikonfigurasi untuk meneruskan rute `/api` langsung ke _service_ Backend secara internal.

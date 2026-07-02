@@ -26,31 +26,28 @@ func NewMahasiswaController(db *sql.DB) *MahasiswaController {
 // @Router       /mahasiswa [get]
 func (a *MahasiswaController) GetMahasiswa(c *gin.Context) {
 	query := `
-		SELECT m.id, m.nama, m.umur, m.nim, m.tgl_lahir, m.alamat, m.id_jurusan, j.nama_jurusan, j.fakultas, j.jenjang
-		FROM mahasiswa m
-		LEFT JOIN jurusan j ON m.id_jurusan = j.id_jurusan
-	`
+        SELECT m.id, m.nama, m.umur, m.nim, TO_CHAR(m.tgl_lahir, 'YYYY-MM-DD'), m.alamat, m.id_jurusan, 
+			COALESCE(j.nama_jurusan, ''), COALESCE(j.fakultas, ''), COALESCE(j.jenjang, '')
+        FROM mahasiswa m
+        LEFT JOIN jurusan j ON m.id_jurusan = j.id_jurusan`
+
 	rows, err := a.db.Query(query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 	defer rows.Close()
 
-	var listMahasiswa []models.Mahasiswa
+	var list []models.Mahasiswa
 	for rows.Next() {
 		var m models.Mahasiswa
 		var j models.Jurusan
-		err := rows.Scan(&m.ID, &m.Nama, &m.Umur, &m.NIM, &m.TglLahir, &m.Alamat, &m.IDJurusan, &j.NamaJurusan, &j.Fakultas, &j.Jenjang)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+		rows.Scan(&m.ID, &m.Nama, &m.Umur, &m.NIM, &m.TglLahir, &m.Alamat, &m.IDJurusan, &j.NamaJurusan, &j.Fakultas, &j.Jenjang)
 		j.IDJurusan = m.IDJurusan
 		m.DetailJurusan = &j
-		listMahasiswa = append(listMahasiswa, m)
+		list = append(list, m)
 	}
-	c.JSON(http.StatusOK, listMahasiswa)
+	c.JSON(200, list)
 }
 
 // @Summary      Menambahkan Data Mahasiswa

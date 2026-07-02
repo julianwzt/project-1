@@ -1,14 +1,36 @@
+# 1. k8s/database.yaml (Timpa semua isinya)
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: postgres-service
-spec:
-  selector:
-    app: postgres
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
+  name: db-init
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS Jurusan (
+      id_jurusan SERIAL PRIMARY KEY, 
+      nama_jurusan VARCHAR(100), 
+      fakultas VARCHAR(100), 
+      jenjang VARCHAR(10)
+    );
+    CREATE TABLE IF NOT EXISTS Mahasiswa (
+      id SERIAL PRIMARY KEY, 
+      nama VARCHAR(150), 
+      umur INT, 
+      nim VARCHAR(20) UNIQUE, 
+      tgl_lahir DATE, 
+      alamat TEXT, 
+      id_jurusan INT
+    );
+    INSERT INTO Jurusan (nama_jurusan, fakultas, jenjang) VALUES
+    ('Teknik Informatika', 'Fakultas Informatika', 'S1'),
+    ('Sistem Informasi', 'Fakultas Informatika', 'S1'),
+    ('Teknik Elektro', 'Fakultas Teknik', 'S1'),
+    ('Teknik Mesin', 'Fakultas Teknik', 'S1'),
+    ('Desain Komunikasi Visual', 'Fakultas Industri Kreatif', 'D4'),
+    ('Manajemen', 'Fakultas Ekonomi dan Bisnis', 'S1'),
+    ('Akuntansi', 'Fakultas Ekonomi dan Bisnis', 'S1');
+
+    INSERT INTO Mahasiswa (nama, umur, nim, tgl_lahir, alamat, id_jurusan) VALUES
+    ('Budi Santoso', 21, '13519001', '2005-05-10', 'Jl. Merdeka No. 10', 1);
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,5 +56,20 @@ spec:
           value: "password"
         - name: POSTGRES_DB
           value: "mahasiswa_db"
-        ports:
-        - containerPort: 5432
+        volumeMounts:
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+      - name: init-script
+        configMap:
+          name: db-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
